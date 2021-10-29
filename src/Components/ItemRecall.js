@@ -1,3 +1,5 @@
+import "./ItemRecall.css"
+
 export function ItemRecall(props) {
     return (
 
@@ -11,31 +13,28 @@ export function ItemRecall(props) {
                 Do not use this page to search and identify customers of regular shop purchases
             </div>
 
-            {props.word}
-
             <div className="mb-2 row">
                 <div className="col-4">
                     <input className="form-control"
                         value={props.searchQuery}
                         onInput={(e) => props.setString(e.target.value)}
                         type='text'
-                        id='header-search'
+                        list="itemNames"
                         placeholder="Begin typing to search"
-                        name='query'
                     />
                 </div>
 
                 <datalist id="itemNames" >
-                    {/* {props.vm.years.map((item, key) =>
-                        <option key={key} value={item} />
-                    )} */}
+                    {props.itemNames.map((name, key) =>
+                        <option key={key} value={name} />
+                    )}
                 </datalist>
 
                 <div className="col-2">
-                    <select 
-                    className="form-control" 
-                    id="searchYear"
-                    onChange={e => props.setYearSelect(e.target.value)}
+                    <select
+                        className="form-control"
+                        id="searchYear"
+                        onChange={e => props.setYearSelect(e.target.value)}
                     >
                         <option value=''>Select a year</option>
                         {props.years.map((year, key) =>
@@ -45,9 +44,15 @@ export function ItemRecall(props) {
                 </div>
 
                 <div className="col-2">
-                    <button type="submit" onClick={(e) => props.fetchItemData(props.searchQuery)} className="btn btn-outline-primary">Search</button>
+                    <button onClick={(e) => props.fetchItemData(props.searchQuery)} className="btn btn-outline-primary">Search</button>
                 </div>
             </div>
+
+            {!props.validSearch &&
+                <div>
+                    <p><b>Search must contain at least 2 charachters</b></p>
+                </div>
+            }
 
             <table className="table table-striped table-hover">
                 <thead>
@@ -60,21 +65,20 @@ export function ItemRecall(props) {
                         <th scope="col">Customers</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody title="View Effected Customers">
 
-                    {props.items.map((item) => 
+                    {props.items.map((item) =>
                         <tr key={item.itemID}
-                            // onclick="detailClick(@item.ItemId)"
+                        onClick={(e)=> props.detailClicked(item, props.searchYear)}
                         >
-                        <td>{item.itemName}</td>
-                        <td>{item.itemDescription}</td>
-                        <td>{"$" + item.itemCost}</td>
-                        <td>{item.itemCatName}</td>
-                        <td>{item.unitsSold}</td>
-                        <td>{item.customerCount}</td>
-                    </tr>
+                            <td>{item.itemName}</td>
+                            <td>{item.itemDescription}</td>
+                            <td>{"$" + item.itemCost}</td>
+                            <td>{item.itemCatName}</td>
+                            <td>{item.unitsSold}</td>
+                            <td>{item.customerCount}</td>
+                        </tr>
                     )}
-
 
                 </tbody>
             </table>
