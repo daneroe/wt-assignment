@@ -1,30 +1,56 @@
 import './App.css';
 import { ItemRecall } from './Components/ItemRecall'
+import { ItemDetail } from './Components/ItemDetail'
 import {
   useEffect,
   useState
 } from 'react';
+import {
+  Switch,
+  Route
+} from "react-router-dom";
 
 function App() {
 
-  // Set default state for our variables
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchYear, setSearchYear] = useState("");
+  // Persisted Data
+  let store = window.sessionStorage
+
+  let storedItemData = JSON.parse(store.getItem('itemData'))
+  let storedQuery = store.getItem('query')
+  let storedYear = store.getItem("year")
+
+  // Set default state for our variables. Use persisted state if exists
+  const [searchQuery, setSearchQuery] = useState(storedQuery || "");
+  const [searchYear, setSearchYear] = useState(storedYear.toString() || "");
   const [validSearch, setValidSearch] = useState(true)
 
   // Set default state for items and years (Empty)
   const [years, setYears] = useState([])
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState(storedItemData || [])
   const [itemNames, setItemNames] = useState([]);
+
+  // Wrapper for setSearchQuery
+  const setString = (query) => {
+    store.setItem('query', query);
+    setSearchQuery(query)
+  }
+
+  // Wrapper for setSearchYear
+  const setYearSelect = (year) => {
+    store.setItem('year', year);
+    setSearchYear(year)
+  }
 
   // URLs
   const BASE_URL = "http://localhost:56384"
   const RECALL_SEARCH = "/api/RecallSearch?searchText="
   const YEAR_SEARCH = "/api/YearList"
   const NAME_LIST = "/api/NameList"
+  const BASE_FRONTEND_URL = 'http://localhost:3000'
 
   const detailClicked = (item, year) => {
-    console.log(item, year)
+    let detailURL = BASE_FRONTEND_URL + `/detail?itemID=${item.itemID}&year=${year}`
+    window.location.assign(detailURL)
   }
 
   const fetchItemData = (query) => {
@@ -34,10 +60,10 @@ function App() {
       setValidSearch(false);
       return;
     }
-    
+
     // Fecth if so
     setValidSearch(true);
-    
+
     const YEARPART = searchYear === "" ? "" : `&year=${searchYear}`
 
     try {
@@ -46,6 +72,7 @@ function App() {
         .then(data => {
           console.log(data)
           setItems(data)
+          store.setItem('itemData', JSON.stringify(data));
         })
     } catch (error) {
       console.log('failed', error)
@@ -78,18 +105,6 @@ function App() {
     }
   }
 
-  // Debug wrapper for setSearchQuery
-  const setString = (query) => {
-    console.log(query)
-    setSearchQuery(query)
-  }
-
-  // Debug wrapper for setSearchYear
-  const setYearSelect = (year) => {
-    console.log(year)
-    setSearchYear(year)
-  }
-
   useEffect(() => {
     fetchYears()
   }, []);
@@ -98,24 +113,28 @@ function App() {
     fetchNames()
   }, []);
 
-  useEffect(() => {
-    fetchNames()
-  }, []);
-
+  // Render
   return (
     <div className='container'>
-      <ItemRecall
-        years={years}
-        items={items}
-        searchQuery={searchQuery}
-        searchYear={searchYear}
-        itemNames={itemNames}
-        validSearch={validSearch}
-        setString={setString}
-        setYearSelect={setYearSelect}
-        fetchItemData={fetchItemData}
-        detailClicked={detailClicked}
-      ></ItemRecall>
+      <Switch>
+        <Route exact path="/">
+          <ItemRecall
+            years={years}
+            items={items}
+            searchQuery={searchQuery}
+            searchYear={searchYear}
+            itemNames={itemNames}
+            validSearch={validSearch}
+            setString={setString}
+            setYearSelect={setYearSelect}
+            fetchItemData={fetchItemData}
+            detailClicked={detailClicked}
+          ></ItemRecall>
+        </Route>
+        <Route path="/detail">
+          <ItemDetail></ItemDetail>
+        </Route>
+      </Switch>
     </div>
   );
 }

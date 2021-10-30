@@ -1,8 +1,8 @@
 import "./ItemRecall.css"
 
 export function ItemRecall(props) {
+      
     return (
-
         <div>
             <div className="alert alert-warning text-center"><h2>Item Recall Search</h2></div>
             <div className="alert alert-danger">
@@ -34,6 +34,7 @@ export function ItemRecall(props) {
                     <select
                         className="form-control"
                         id="searchYear"
+                        value={props.searchYear}
                         onChange={e => props.setYearSelect(e.target.value)}
                     >
                         <option value=''>Select a year</option>
@@ -79,7 +80,6 @@ export function ItemRecall(props) {
                             <td>{item.customerCount}</td>
                         </tr>
                     )}
-
                 </tbody>
             </table>
 
